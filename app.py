@@ -5,7 +5,7 @@ from google.oauth2.service_account import Credentials
 import json
 
 # ==========================================
-# 設定エリア（ここをご自身のURLに変更！）
+# 設定エリア
 # ==========================================
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1cPSPPkZLCwvC3O6uQDu1mT86f9Qwqx34Vspml7lPAVo/edit?gid=0#gid=0"
 
@@ -36,47 +36,70 @@ def load_data():
 df = load_data()
 
 # ==========================================
-# サイドバー：自分のパーティ設定
+# メイン画面：対戦記録
 # ==========================================
-st.sidebar.header("🎒 自分のパーティ設定")
-st.sidebar.write("※ここで選んだ6匹が選出画面に表示されます")
-my_party = st.sidebar.multiselect("自分の6匹", POKEMON_LIST, max_selections=6)
+st.title("ポケモン チャンピオンズ 対戦記録")
 
-# ==========================================
-# メイン画面：対戦記録フォーム
-# ==========================================
-st.title("⚔️ ポケモン チャンピオンズ 対戦記録")
+st.header("新しい対戦の記録")
 
-st.header("📝 新しい対戦の記録")
-with st.form("battle_form", clear_on_submit=True):
-    opp_6 = st.multiselect("相手のパーティ6匹", POKEMON_LIST, max_selections=6)
-    
-    # 相手の選出は、相手の6匹の中から選ぶ
-    opp_4 = st.multiselect("相手の選出4匹", opp_6 if opp_6 else POKEMON_LIST, max_selections=4)
-    
-    # 自分の選出は、サイドバーで設定した自分のパーティから選ぶ
-    my_4 = st.multiselect("自分の選出4匹", my_party if my_party else POKEMON_LIST, max_selections=4)
-    
-    result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True)
-    last_pokemon = st.selectbox("最後に場に残ったポケモン", ["なし"] + (my_4 + opp_4))
-    
-    submit_button = st.form_submit_button("記録をスプレッドシートに保存")
+st.write("▼ まずは今回の自分のパーティ（6匹）を登録します")
+my_party = st.multiselect(
+    "自分のパーティ", 
+    POKEMON_LIST, 
+    max_selections=6,
+    placeholder="タップして文字を入力すると検索できます"
+)
 
-# 保存処理
-if submit_button:
-    if len(opp_6) > 0 and len(opp_4) > 0 and len(my_4) > 0:
-        # リストをカンマ区切りの文字列に変換
-        opp_6_str = ", ".join(opp_6)
-        opp_4_str = ", ".join(opp_4)
-        my_4_str = ", ".join(my_4)
-        date_str = pd.Timestamp.now("Asia/Tokyo").strftime("%Y-%m-%d %H:%M")
+# 自分のパーティが1匹以上選ばれている場合のみ、下の記録フォームを開放する
+if len(my_party) > 0:
+    st.write("---")
+    st.write("▼ 対戦結果を記録します")
+    
+    with st.form("battle_form", clear_on_submit=True):
+        opp_6 = st.multiselect(
+            "相手のパーティ6匹", 
+            POKEMON_LIST, 
+            max_selections=6,
+            placeholder="タップして検索..."
+        )
         
-        # スプレッドシートに追記
-        sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon])
-        st.success("✅ スプレッドシートに保存しました！")
-        st.balloons()
-    else:
-        st.error("⚠️ 相手の6匹、相手の選出、自分の選出をそれぞれ1匹以上選んでください。")
+        opp_4_options = opp_6 if opp_6 else POKEMON_LIST
+        opp_4 = st.multiselect(
+            "相手の選出4匹", 
+            opp_4_options, 
+            max_selections=4,
+            placeholder="タップして検索..."
+        )
+        
+        my_4 = st.multiselect(
+            "自分の選出4匹", 
+            my_party, 
+            max_selections=4,
+            placeholder="タップして検索..."
+        )
+        
+        result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True)
+        
+        last_pokemon_options = ["なし"] + my_4 + opp_4
+        last_pokemon = st.selectbox("最後に場に残ったポケモン", last_pokemon_options)
+        
+        submit_button = st.form_submit_button("記録をスプレッドシートに保存")
+
+    # 保存処理
+    if submit_button:
+        if len(opp_6) > 0 and len(opp_4) > 0 and len(my_4) > 0:
+            opp_6_str = ", ".join(opp_6)
+            opp_4_str = ", ".join(opp_4)
+            my_4_str = ", ".join(my_4)
+            date_str = pd.Timestamp.now("Asia/Tokyo").strftime("%Y-%m-%d %H:%M")
+            
+            sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon])
+            st.success("✅ スプレッドシートに保存しました！")
+            st.balloons()
+        else:
+            st.error("⚠️ 相手の6匹、相手の選出、自分の選出をそれぞれ1匹以上選んでください。")
+else:
+    st.info("👆 上の枠に「自分のパーティ」を登録すると、対戦記録の入力フォームが表示されます。")
 
 # ==========================================
 # 分析画面：選出率と履歴
@@ -94,7 +117,7 @@ if not df.empty:
     # 自分の選出列からすべてのポケモンを抽出してカウント
     all_my_picks = []
     for picks in df["自分の選出"]:
-        all_my_picks.extend(picks.split(", "))
+        all_my_picks.extend(str(picks).split(", "))
     
     if all_my_picks:
         pick_counts = pd.Series(all_my_picks).value_counts().reset_index()
@@ -110,6 +133,6 @@ if not df.empty:
 
     # 履歴表示
     st.subheader("📋 スプレッドシートの記録")
-    st.dataframe(df)
+    st.dataframe(df.sort_index(ascending=False))
 else:
     st.info("まだスプレッドシートにデータがありません。")
