@@ -77,10 +77,15 @@ my_4 = st.multiselect(
 )
 
 result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True)
-
-# 最後に残ったポケモンは、選出されたポケモンから選ぶ
-last_pokemon_options = ["なし"] + my_4 + opp_4
-last_pokemon = st.selectbox("最後に場に残ったポケモン", last_pokemon_options)
+        
+# ▼▼▼ 変更箇所：最後に残ったポケモンを最大2匹のマルチセレクトに変更 ▼▼▼
+last_pokemon_options = my_4 + opp_4
+last_pokemon = st.multiselect(
+    "最後に場に残ったポケモン", 
+    last_pokemon_options, 
+    max_selections=2,
+    placeholder="タップして選択（空欄なら「なし」になります）"
+)
 
 # 記録ボタン
 if st.button("記録をスプレッドシートに保存"):
@@ -89,8 +94,13 @@ if st.button("記録をスプレッドシートに保存"):
         opp_4_str = ", ".join(opp_4)
         my_4_str = ", ".join(my_4)
         date_str = pd.Timestamp.now("Asia/Tokyo").strftime("%Y-%m-%d %H:%M")
-        
-        sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon])
+
+        # ▼▼▼ 変更箇所：保存データに「自分のパーティ6匹」と「残ったポケモンの処理」を追加 ▼▼▼
+        last_pokemon_str = ", ".join(last_pokemon) if len(last_pokemon) > 0 else "なし"
+        current_party_str = ", ".join(MY_PARTY)
+
+        # G列に自分の6匹を記録するように [current_party_str] を追加
+        sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon_str, current_party_str])
         st.success("スプレッドシートに保存しました！")
     else:
         st.error("相手の6匹、相手の選出、自分の選出をそれぞれ1匹以上選んでください。")
@@ -102,33 +112,64 @@ else:
 # ==========================================
 st.header("データ分析")
 
-# 最新のデータを再読み込みするボタン
 if st.button("データを最新に更新"):
     df = load_data()
 
 if not df.empty:
-    # 自分のポケモンの選出回数をカウント
-    st.subheader("自分のポケモンの選出割合")
-    
-    # 自分の選出列からすべてのポケモンを抽出してカウント
-    all_my_picks = []
-    for picks in df["自分の選出"]:
-        all_my_picks.extend(str(picks).split(", "))
-    
-    if all_my_picks:
-        pick_counts = pd.Series(all_my_picks).value_counts().reset_index()
-        pick_counts.columns = ['ポケモン', '選出回数']
+    if "自分の6匹" in df.columns:
+        # スプレッドシートの記録を、順番に依存しない形（名前順）に整える関数
+        def sort_party_str(party_str):
+            if pd.isna(party_str) or str(party_str).strip() == "":
+                return ""
+            # カンマで区切って、前後の空白を消して、並び替えて、再度結合する
+            return ", ".join(sorted([p.strip() for p in str(party_str).split(",") if p.strip()]))
         
-        # 棒グラフで表示
-        st.bar_chart(pick_counts.set_index('ポケモン'))
+        # 比較用の新しい列「分析用パーティ」を一時的に作る
+        df["分析用パーティ"] = df["自分の6匹"].apply(sort_party_str)
+        
+        # これまで使ったパーティの履歴を取得（空のデータは除外）
+        party_history = [p for p in df["分析用パーティ"].unique() if p != ""]
+        
+        # 現在のパーティ（MY_PARTY）も同じルールで並び替える
+        current_party_str = ", ".join(sorted(MY_PARTY))
+        
+        # 現在のパーティが履歴になければ追加
+        if current_party_str not in party_history:
+            party_history.insert(0, current_party_str)
+            
+        # プルダウンで分析対象を選択
+        selected_party = st.selectbox(
+            "▼ 分析するパーティを選択", 
+            party_history, 
+            index=party_history.index(current_party_str) if current_party_str in party_history else 0
+        )
+        
+        # 並び替えた結果が一致するデータだけで絞り込み
+        df_filtered = df[df["分析用パーティ"] == selected_party]
+    else:
+        df_filtered = df
+        st.warning("※スプレッドシートに「自分の6匹」列がないため、全データを表示しています。")
 
-    # 勝率などの表示
-    win_count = len(df[df["勝敗"] == "勝ち"])
-    total_count = len(df)
-    st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
+    # 絞り込んだデータで集計・表示
+    if not df_filtered.empty:
+        st.subheader("自分のポケモンの選出割合")
+        
+        all_my_picks = []
+        for picks in df_filtered["自分の選出"]:
+            all_my_picks.extend(str(picks).split(", "))
+        
+        if all_my_picks:
+            pick_counts = pd.Series(all_my_picks).value_counts().reset_index()
+            pick_counts.columns = ['ポケモン', '選出回数']
+            st.bar_chart(pick_counts.set_index('ポケモン'))
 
-    # 履歴表示
-    st.subheader("スプレッドシートの記録")
-    st.dataframe(df.sort_index(ascending=False))
+        win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
+        total_count = len(df_filtered)
+        st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
+
+        st.subheader("スプレッドシートの記録")
+        st.dataframe(df_filtered.sort_index(ascending=False))
+    else:
+        st.info("このパーティでの対戦記録はまだありません。")
 else:
     st.info("まだスプレッドシートにデータがありません。")
