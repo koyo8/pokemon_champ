@@ -94,25 +94,25 @@ if len(my_party) > 0:
             date_str = pd.Timestamp.now("Asia/Tokyo").strftime("%Y-%m-%d %H:%M")
             
             sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon])
-            st.success("✅ スプレッドシートに保存しました！")
+            st.success("スプレッドシートに保存しました！")
             st.balloons()
         else:
-            st.error("⚠️ 相手の6匹、相手の選出、自分の選出をそれぞれ1匹以上選んでください。")
+            st.error("相手の6匹、相手の選出、自分の選出をそれぞれ1匹以上選んでください。")
 else:
-    st.info("👆 上の枠に「自分のパーティ」を登録すると、対戦記録の入力フォームが表示されます。")
+    st.info("上の枠に「自分のパーティ」を登録すると、対戦記録の入力フォームが表示されます。")
 
 # ==========================================
 # 分析画面：選出率と履歴
 # ==========================================
-st.header("📊 データ分析")
+st.header("データ分析")
 
 # 最新のデータを再読み込みするボタン
-if st.button("🔄 データを最新に更新"):
+if st.button("データを最新に更新"):
     df = load_data()
 
 if not df.empty:
     # 自分のポケモンの選出回数をカウント
-    st.subheader("📈 自分のポケモンの選出割合")
+    st.subheader("自分のポケモンの選出割合")
     
     # 自分の選出列からすべてのポケモンを抽出してカウント
     all_my_picks = []
@@ -132,7 +132,7 @@ if not df.empty:
     st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
 
     # 履歴表示
-    st.subheader("📋 スプレッドシートの記録")
+    st.subheader("スプレッドシートの記録")
     st.dataframe(df.sort_index(ascending=False))
 else:
     st.info("まだスプレッドシートにデータがありません。")
