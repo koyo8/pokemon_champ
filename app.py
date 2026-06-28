@@ -106,8 +106,9 @@ with st.form("form_record"):
             # スプレッドシートに保存
             sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon_str, current_party_str])
             
-            # 保存完了後、一番上の検索枠を空っぽにしてリセット
-            st.session_state.opp_6_widget = []
+            # 保存完了後、検索枠の「記憶」を削除してリセットする
+            if "opp_6_widget" in st.session_state:
+                del st.session_state["opp_6_widget"]
             st.rerun()
 
 # ==========================================
