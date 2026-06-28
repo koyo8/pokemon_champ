@@ -10,7 +10,6 @@ import altair as alt
 # ==========================================
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1cPSPPkZLCwvC3O6uQDu1mT86f9Qwqx34Vspml7lPAVo/edit?gid=0#gid=0"
 
-# ポケモンリスト
 POKEMON_LIST = [
     "ガブリアス","メガガブリアス","エルフーン","イダイトウ♂","ヤバソチャ","ガオガエン","ドドゲザン","リザードン","メガリザードンX","メガリザードンY","オオニューラ","ムクホーク","メガムクホーク","ニンフィア","ペリッパー","ブリジュラス","リキキリン","ラグラージ","メガラグラージ","ライチュウ","メガライチュウX","メガライチュウY","メタグロス","メガメタグロス","オーロンゲ","プテラ","メガプテラ","サーフゴー","ヤミラミ","メガヤミラミ","コータス","フラエッテ(えいえん)","メガフラエッテ","クチート","メガクチート","フシギバナ","メガフシギバナ","カイリュー","メガカイリュー","イッカネズミ","バンギラス","メガバンギラス","ユキメノコ","メガユキメノコ","ミロカロス","ウォッシュロトム","サザンドラ","キュウコン(アローラ)","コノヨザル","ファイアロー","マフォクシー","メガマフォクシー","ガルーラ","メガガルーラ","ゲンガー","メガゲンガー","バシャーモ","メガバシャーモ","アシレーヌ","カエンジシ","メガカエンジシ","ジュカイン","メガジュカイン","バクフーン(ヒスイ)","カメックス","メガカメックス","ニョロトノ","サーナイト","メガサーナイト","シビルドン","メガシビルドン","ズルズキン","メガズルズキン","キラフロル","メガキラフロル","マスカーニャ","ヒートロトム","ドリュウズ","メガドリュウズ","アーマーガア","ヤレユータン","アマージョ","エルレイド","メガエルレイド","ハッサム","メガハッサム","スコヴィラン","メガスコヴィラン","ソウブレイズ","ゾロアーク(ヒスイ)","メガニウム","メガメガニウム","ピクシー","メガピクシー","マンムー","ドラミドロ","メガドラミドロ","ブリムオン","イダイトウ♀","ドラパルト","バクーダ","メガバクーダ","ビビヨン","ミミッキュ","ドヒドイデ","ギャラドス","メガギャラドス","ウインディ(ヒスイ)","キュウコン","ギルガルド(シールド)","ギルガルド(ブレード)","ジャラランガ","ジジーロン","メガジジーロン","ラフレシア","ウルガモス","スターミー","メガスターミー","バイバニラ","ゲッコウガ","メガゲッコウガ","カラマネロ","メガカラマネロ","グレンアルマ","マニューラ","マリルリ","カビゴン","ニャオニクス♂","メガニャオニクス♂","ルカリオ","メガルカリオ","ルガルガン(たそがれ)","ダイケンキ(ヒスイ)","ハリーマン","シャンデラ","メガシャンデラ","デカヌチャン","ゴルーグ","メガゴルーグ","オニシズクモ","ケケンカニ","メガケケンカニ","ウインディ","ユキノオー","メガユキノオー","バサギリ","ボスゴドラ","メガボスゴドラ","ミミロップ","メガミミロップ","クエスパトラ","ハガネール","メガハガネール","エレザード","ヤドキング(ガラル)","ラウドボーン","ハラバリー","イルカマン(ナイーブ)","イルカマン(マイティ)","ジャローダ","ルチャブル","メガルチャブル","ハカドッグ","サンダース","デンリュウ","メガデンリュウ","エンペルト","ヌメルゴン(ヒスイ)","クレッフィ","ローブシン","ドサイドン","グライオン","バンバドロ","メタモン","ランクルス","アヤシシ","ミカルゲ","フロストロトム","ブラッキー","デスカーン","ジュナイパー(ヒスイ)","ペンドラー","メガペンドラー","バリコオル","オーダイル","メガオーダイル","フーディン","メガフーディン","グレイシア","チルタリス","メガチルタリス","ケンタロス(パルデア水)","カットロトム","エアームド","メガエアームド","ヤドラン","メガヤドラン","カミツオロチ","ワルビアル","ミミズズ","ヤドラン(ガラル)","オンバーン","カイリキー","レパルダス","ブリガロン","メガブリガロン","ブロスター","ゴウカザル","カバルドン","デスバーン","マホイップ","タイレーツ","メガタイレーツ","アマルルガ","ライボルト","メガライボルト","オニゴーリ","メガオニゴーリ","バクフーン","ヘラクロス","メガヘラクロス","ガメノデス","メガガメノデス","フレフワン","ヤドキング","タブンネ","メガタブンネ","チャーレム","メガチャーレム","エンニュート","シャワーズ","ドダイトス","ジュペッタ","メガジュペッタ","ドクロッグ","ムシャーナ","ケンタロス(パルデア炎)","エーフィ","キョジオーン","チリーン","メガチリーン","ピカチュウ","ルガルガン(まひる)","ウツボット","メガウツボット","オーロット","ウェーニバル","ラムパルド","サメハダー","メガサメハダー","ヘルガー","メガヘルガー","ツンベアー","カイロス","メガカイロス","リーフィア","クレベース(ヒスイ)","ヌメルゴン","ニャオニクス♀","メガニャオニクス♀","モルペコ","エンブオー","メガエンブオー","ドデカバシ","ロズレイド","レントラー","ピジョット","メガピジョット","ガチゴラス","ゴロンダ","フラージェス","スピアー","メガスピアー","ホルード","ライチュウ(アローラ)","アリアドス","アブソル","メガアブソル","ゾロアーク","エモンガ","ポットデス","サダイジャ","タルップル","マッギョ","パンプジン(特大)","ジュナイパー","ロトム","アップリュー","クレベース","スピンロトム","ナゲツケサル","トリデプス","ブースター","フォレトス","ハリーセン","ルガルガン(まよなか)","トリミアン","デデンネ","ケンタロス","ヒヤッキー","アーボック","ペロリーム","ポワルン","ケンタロス(パルデア単)","ダストダス","パンプジン(普通)","ダイケンキ","マッギョ(ガラル)","パンプジン(小)","パンプジン(大)","ヤナッキー","バオッキー","ミルホッグ"
 ]
@@ -20,12 +19,18 @@ MY_PARTY = [
     "イダイトウ♂","エルフーン","メガムクホーク","サーフゴー","ヒートロトム","アシレーヌ"
 ]
 
+# カタカナをひらがなに変換するルール
+kata2hira = str.maketrans(
+    "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴ", 
+    "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔ"
+)
+display_to_orig = {f"{p} ({p.translate(kata2hira)})": p for p in POKEMON_LIST}
+
 # ==========================================
-# スプレッドシート連携の準備
+# スプレッドシート連携
 # ==========================================
 @st.cache_resource
 def init_connection():
-    # StreamlitのSecretsから鍵情報を読み込む
     key_dict = json.loads(st.secrets["gcp_service_account"]["key"])
     scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     creds = Credentials.from_service_account_info(key_dict, scopes=scopes)
@@ -34,142 +39,204 @@ def init_connection():
 
 sheet = init_connection()
 
-# データの読み込み
 def load_data():
     records = sheet.get_all_records()
     return pd.DataFrame(records)
 
-df = load_data()
+# ==========================================
+# データ保存処理（バグ回避のための裏側処理）
+# ==========================================
+if "reset_counter" not in st.session_state:
+    st.session_state.reset_counter = 0
+
+def save_record():
+    rk = st.session_state.reset_counter
+    
+    # 画面の入力内容を取得
+    selected_display = st.session_state.get(f"opp_6_widget_{rk}", [])
+    current_opp_6 = [display_to_orig[s] for s in selected_display]
+    
+    opp_lead = st.session_state.get(f"opp_lead_{rk}", [])
+    opp_back = st.session_state.get(f"opp_back_{rk}", [])
+    my_lead = st.session_state.get(f"my_lead_{rk}", [])
+    my_back = st.session_state.get(f"my_back_{rk}", [])
+    result = st.session_state.get(f"result_widget_{rk}")
+
+    # エラーチェック
+    if len(current_opp_6) == 0:
+        st.session_state.msg = ("error", "相手のパーティを1匹以上選んでください。")
+        return
+    if len(opp_lead) != 2 or len(opp_back) != 2:
+        st.session_state.msg = ("error", "相手の先発と後発を2匹ずつ選んでください。")
+        return
+    if set(opp_lead) & set(opp_back):
+        st.session_state.msg = ("error", "相手の先発と後発で同じポケモンが選ばれています。")
+        return
+    if len(my_lead) != 2 or len(my_back) != 2:
+        st.session_state.msg = ("error", "自分の先発と後発を2匹ずつ選んでください。")
+        return
+    if set(my_lead) & set(my_back):
+        st.session_state.msg = ("error", "自分の先発と後発で同じポケモンが選ばれています。")
+        return
+    if result is None:
+        st.session_state.msg = ("error", "勝敗を選択してください。")
+        return
+
+    # 保存データの整形
+    opp_6_str = ", ".join(current_opp_6)
+    opp_4_str = ", ".join(opp_lead + opp_back)
+    opp_lead_str = ", ".join(opp_lead)
+    my_4_str = ", ".join(my_lead + my_back)
+    my_lead_str = ", ".join(my_lead)
+    current_party_str = ", ".join(sorted(MY_PARTY))
+    date_str = pd.Timestamp.now("Asia/Tokyo").strftime("%Y-%m-%d %H:%M")
+    
+    # スプレッドシートに追記 (順番: 日時, 相手6, 相手選出, 自分選出, 勝敗, 自分先発, 相手先発, 自分6)
+    sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, my_lead_str, opp_lead_str, current_party_str])
+    
+    # 成功メッセージと画面のリセット
+    st.session_state.msg = ("success", "記録を保存しました！")
+    st.session_state.reset_counter += 1
 
 # ==========================================
 # メイン画面：対戦記録
 # ==========================================
-st.title("ポケモン チャンピオンズ 対戦記録")
+st.title("ポケモンチャンピオンズ 対戦記録")
 
-st.header("新しい対戦の記録")
-
-# --- 確実なリセットのための仕組み（カウンター） ---
-if "reset_counter" not in st.session_state:
-    st.session_state.reset_counter = 0
+# メッセージ表示用
+if "msg" in st.session_state:
+    msg_type, msg_text = st.session_state.msg
+    if msg_type == "error":
+        st.error(msg_text)
+    else:
+        st.success(msg_text)
+    del st.session_state.msg
 
 rk = st.session_state.reset_counter
 
-# カタカナをひらがなに変換するルール
-kata2hira = str.maketrans(
-    "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴ", 
-    "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔ"
-)
+st.header("新しい対戦の記録")
 
-# 「リザードン (りざーどん)」の対応表
-display_to_orig = {f"{p} ({p.translate(kata2hira)})": p for p in POKEMON_LIST}
-
-# --- ① 相手のパーティを入力（ひらがな検索OK） ---
+# --- ① 相手のパーティを入力 ---
 selected_display = st.multiselect(
-    "▼ ① 相手のパーティ6匹を選択", 
+    "▼ 相手のパーティ6匹を選択", 
     options=list(display_to_orig.keys()),
     max_selections=6,
-    key=f"opp_6_widget_{rk}", # ← カウンターを鍵にする
+    key=f"opp_6_widget_{rk}",
     placeholder="検索..."
 )
-
-# 選択された表示用名前を元の名前に戻す
 current_opp_6 = [display_to_orig[s] for s in selected_display]
 
 st.write("---")
 
-# --- ② 選出と結果を記録（フォーム内で1タップサクサク操作） ---
+# --- ② 選出と結果を記録 ---
 with st.form("form_record"):
-    st.write("▼ ② 選出と結果を記録")
+    st.write("▼ 選出と先発を記録")
     
-    # 上で選んだ6匹がリアルタイムにここの選択肢に反映されます
-    opp_4 = st.pills("相手の選出4匹", options=current_opp_6, selection_mode="multi", key=f"opp_4_widget_{rk}")
-    my_4 = st.pills("自分の選出4匹", options=MY_PARTY, selection_mode="multi", key=f"my_4_widget_{rk}")
+    # 【追加機能】順番を気にせず「先発」と「後発」を分けて選択させることで正確にデータを取ります
+    st.write("**【相手の選出】**")
+    opp_lead = st.pills("相手の先発 (2匹)", options=current_opp_6, selection_mode="multi", max_selections=2, key=f"opp_lead_{rk}")
+    opp_back = st.pills("相手の後発 (2匹)", options=current_opp_6, selection_mode="multi", max_selections=2, key=f"opp_back_{rk}")
     
-    # index=None を追加し、最初は何も選ばれていない状態にする
+    st.write("**【自分の選出】**")
+    my_lead = st.pills("自分の先発 (2匹)", options=MY_PARTY, selection_mode="multi", max_selections=2, key=f"my_lead_{rk}")
+    my_back = st.pills("自分の後発 (2匹)", options=MY_PARTY, selection_mode="multi", max_selections=2, key=f"my_back_{rk}")
+    
+    st.write("---")
     result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True, index=None, key=f"result_widget_{rk}")
     
-    last_pokemon_options = MY_PARTY + current_opp_6
-    last_poke = st.pills("最後に場に残ったポケモン", options=last_pokemon_options, selection_mode="multi", key=f"last_poke_widget_{rk}")
-    
-    # 記録ボタン
-    if st.form_submit_button("スプレッドシートに保存"):
-        # 各種エラーチェック
-        if len(current_opp_6) == 0:
-            st.error("上部で相手のパーティを1匹以上選んでください。")
-        elif len(opp_4) == 0 or len(my_4) == 0:
-            st.error("相手の選出と自分の選出をそれぞれ1匹以上選んでください。")
-        elif len(opp_4) > 4 or len(my_4) > 4:
-            st.error("選出はそれぞれ4匹以下にしてください。")
-        elif len(last_poke) > 2:
-            st.error("最後に残ったポケモンは2匹以下にしてください。")
-        elif result is None:
-            st.error("勝敗を選択してください。")
-        else:
-            opp_6_str = ", ".join(current_opp_6)
-            opp_4_str = ", ".join(opp_4)
-            my_4_str = ", ".join(my_4)
-            date_str = pd.Timestamp.now("Asia/Tokyo").strftime("%Y-%m-%d %H:%M")
-            
-            last_pokemon_str = ", ".join(last_poke) if len(last_poke) > 0 else "なし"
-            current_party_str = ", ".join(sorted(MY_PARTY))
-            
-            # スプレッドシートに保存
-            sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon_str, current_party_str])
-            
-            # 保存完了後、カウンターを増やしてすべての入力枠を「新品」に生まれ変わらせる
-            st.session_state.reset_counter += 1
-            st.rerun()
+    # ボタンを押した時に「save_record」を裏側で実行させる
+    st.form_submit_button("スプレッドシートに保存", on_click=save_record)
 
 # ==========================================
 # 分析画面：選出率と履歴
 # ==========================================
 st.header("データ分析")
-
-if st.button("データを最新に更新"):
-    df = load_data()
+df = load_data()
 
 if not df.empty:
+    # --- パーティごとの絞り込み ---
     if "自分の6匹" in df.columns:
-        # スプレッドシートの記録を、順番に依存しない形（名前順）に整える関数
         def sort_party_str(party_str):
-            if pd.isna(party_str) or str(party_str).strip() == "":
-                return ""
-            # カンマで区切って、前後の空白を消して、並び替えて、再度結合する
+            if pd.isna(party_str) or str(party_str).strip() == "": return ""
             return ", ".join(sorted([p.strip() for p in str(party_str).split(",") if p.strip()]))
         
-        # 比較用の新しい列「分析用パーティ」を一時的に作る
         df["分析用パーティ"] = df["自分の6匹"].apply(sort_party_str)
-        
-        # これまで使ったパーティの履歴を取得（空のデータは除外）
         party_history = [p for p in df["分析用パーティ"].unique() if p != ""]
-        
-        # 現在のパーティ（MY_PARTY）も同じルールで並び替える
         current_party_str = ", ".join(sorted(MY_PARTY))
-        
-        # 現在のパーティが履歴になければ追加
         if current_party_str not in party_history:
             party_history.insert(0, current_party_str)
             
-        # プルダウンで分析対象を選択
         selected_party = st.selectbox(
             "▼ 分析するパーティを選択", 
             party_history, 
             index=party_history.index(current_party_str) if current_party_str in party_history else 0
         )
-        
-        # 並び替えた結果が一致するデータだけで絞り込み
         df_filtered = df[df["分析用パーティ"] == selected_party]
     else:
         df_filtered = df
-        st.warning("※スプレッドシートに「自分の6匹」列がないため、全データを表示しています。")
 
-    # 絞り込んだデータで集計・表示
     if not df_filtered.empty:
-        st.subheader("自分のポケモンの選出割合")
-        
+        # --- 勝率表示 ---
+        win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
+        total_count = len(df_filtered)
+        st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
+        st.write("---")
+
+        # --- 相手の選出率・先発率の分析（超強力機能） ---
+        if "相手の6匹" in df.columns and "相手の選出" in df.columns:
+            st.subheader("相手のポケモンの選出率・先発率")
+            
+            opp_data = []
+            for idx, row in df_filtered.iterrows():
+                opp_6_str = str(row.get("相手の6匹", ""))
+                opp_4_str = str(row.get("相手の選出", ""))
+                opp_lead_str = str(row.get("相手の先発", "")) # 古いデータ対策として .get を使用
+                
+                if pd.notna(opp_6_str) and opp_6_str.strip() != "":
+                    # データをリスト化
+                    o_6 = [p.strip() for p in opp_6_str.split(",") if p.strip()]
+                    o_4 = [p.strip() for p in opp_4_str.split(",") if p.strip()] if pd.notna(opp_4_str) else []
+                    o_lead = [p.strip() for p in opp_lead_str.split(",") if p.strip()] if pd.notna(opp_lead_str) else []
+                    
+                    # パーティにいた各ポケモンが、選出されたか・先発だったかを記録
+                    for p in o_6:
+                        opp_data.append({
+                            "ポケモン": p,
+                            "選出": 1 if p in o_4 else 0,
+                            "先発": 1 if p in o_lead else 0
+                        })
+            
+            if opp_data:
+                opp_df = pd.DataFrame(opp_data)
+                # ポケモンごとに集計
+                stats_df = opp_df.groupby("ポケモン").agg(
+                    遭遇回数=("ポケモン", "count"),
+                    選出回数=("選出", "sum"),
+                    先発回数=("先発", "sum")
+                ).reset_index()
+                
+                # 確率を計算
+                stats_df["選出率"] = (stats_df["選出回数"] / stats_df["遭遇回数"]) * 100
+                stats_df["先発率"] = (stats_df["先発回数"] / stats_df["遭遇回数"]) * 100
+                
+                # 遭遇回数が多い順 ＞ 選出率が高い順 に並び替え
+                stats_df = stats_df.sort_values(by=["遭遇回数", "選出率"], ascending=[False, False])
+                
+                # パーセンテージ表示に整える
+                stats_df["選出率"] = stats_df["選出率"].apply(lambda x: f"{x:.1f}%")
+                stats_df["先発率"] = stats_df["先発率"].apply(lambda x: f"{x:.1f}%")
+                
+                st.dataframe(stats_df, use_container_width=True)
+            else:
+                st.info("集計できる相手のデータがありません。")
+            
+            st.write("---")
+
+        # --- 自分の選出割合 ---
+        st.subheader("自分のポケモンの選出回数")
         all_my_picks = []
         for picks in df_filtered["自分の選出"]:
-            all_my_picks.extend(str(picks).split(", "))
+            all_my_picks.extend([p.strip() for p in str(picks).split(",") if p.strip()])
         
         if all_my_picks:
             pick_counts = pd.Series(all_my_picks).value_counts().reset_index()
@@ -177,16 +244,12 @@ if not df.empty:
             chart = alt.Chart(pick_counts).mark_bar().encode(
                 x=alt.X('ポケモン', sort=None, title='ポケモン'),
                 y=alt.Y('選出回数', title='選出回数'),
-                tooltip=['ポケモン', '選出回数'] # マウスを乗せた時だけ数字が出るように設定
+                tooltip=['ポケモン', '選出回数']
             )
             st.altair_chart(chart, use_container_width=True)
 
-        win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
-        total_count = len(df_filtered)
-        st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
-
-        st.subheader("スプレッドシートの記録")
-        st.dataframe(df_filtered.sort_index(ascending=False))
+        st.subheader("直近の対戦履歴")
+        st.dataframe(df_filtered.sort_index(ascending=False).head(20))
     else:
         st.info("このパーティでの対戦記録はまだありません。")
 else:
