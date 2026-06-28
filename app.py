@@ -48,6 +48,12 @@ st.title("ポケモン チャンピオンズ 対戦記録")
 
 st.header("新しい対戦の記録")
 
+# --- 確実なリセットのための仕組み（カウンター） ---
+if "reset_counter" not in st.session_state:
+    st.session_state.reset_counter = 0
+
+rk = st.session_state.reset_counter
+
 # カタカナをひらがなに変換するルール
 kata2hira = str.maketrans(
     "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴ", 
@@ -62,7 +68,7 @@ selected_display = st.multiselect(
     "▼ ① 相手のパーティ6匹を選択", 
     options=list(display_to_orig.keys()),
     max_selections=6,
-    key="opp_6_widget", # 保存後にリセットするための鍵
+    key=f"opp_6_widget_{rk}", # ← カウンターを鍵にする
     placeholder="検索..."
 )
 
@@ -76,12 +82,14 @@ with st.form("form_record"):
     st.write("▼ ② 選出と結果を記録")
     
     # 上で選んだ6匹がリアルタイムにここの選択肢に反映されます
-    opp_4 = st.pills("相手の選出4匹", options=current_opp_6, selection_mode="multi")
-    my_4 = st.pills("自分の選出4匹", options=MY_PARTY, selection_mode="multi")
-    result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True)
+    opp_4 = st.pills("相手の選出4匹", options=current_opp_6, selection_mode="multi", key=f"opp_4_widget_{rk}")
+    my_4 = st.pills("自分の選出4匹", options=MY_PARTY, selection_mode="multi", key=f"my_4_widget_{rk}")
+    
+    # index=None を追加し、最初は何も選ばれていない状態にする
+    result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True, index=None, key=f"result_widget_{rk}")
     
     last_pokemon_options = MY_PARTY + current_opp_6
-    last_poke = st.pills("最後に場に残ったポケモン", options=last_pokemon_options, selection_mode="multi")
+    last_poke = st.pills("最後に場に残ったポケモン", options=last_pokemon_options, selection_mode="multi", key=f"last_poke_widget_{rk}")
     
     # 記録ボタン
     if st.form_submit_button("スプレッドシートに保存"):
@@ -94,6 +102,8 @@ with st.form("form_record"):
             st.error("選出はそれぞれ4匹以下にしてください。")
         elif len(last_poke) > 2:
             st.error("最後に残ったポケモンは2匹以下にしてください。")
+        elif result is None:
+            st.error("勝敗を選択してください。")
         else:
             opp_6_str = ", ".join(current_opp_6)
             opp_4_str = ", ".join(opp_4)
@@ -106,9 +116,8 @@ with st.form("form_record"):
             # スプレッドシートに保存
             sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon_str, current_party_str])
             
-            # 保存完了後、検索枠の「記憶」を削除してリセットする
-            if "opp_6_widget" in st.session_state:
-                del st.session_state["opp_6_widget"]
+            # 保存完了後、カウンターを増やしてすべての入力枠を「新品」に生まれ変わらせる
+            st.session_state.reset_counter += 1
             st.rerun()
 
 # ==========================================
