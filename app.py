@@ -48,6 +48,20 @@ st.title("ポケモン チャンピオンズ 対戦記録")
 
 st.header("新しい対戦の記録")
 
+# --- スマホの2回タップ問題を解消 ---
+st.markdown(
+    """
+    <style>
+    /* iPhoneのホバー判定を無効化し、1回のタップで即座に反応させる */
+    div[data-testid="stPills"] label {
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # --- 自動リセットのための準備 ---
 if "opp_6" not in st.session_state: st.session_state.opp_6 = []
 if "opp_4" not in st.session_state: st.session_state.opp_4 = []
