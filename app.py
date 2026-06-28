@@ -50,46 +50,30 @@ st.header("新しい対戦の記録")
 
 # --- 画面切り替えのための状態管理 ---
 if "step" not in st.session_state: st.session_state.step = 1
-if "opp_6" not in st.session_state: st.session_state.opp_6 = []
 
 # ==========================================
 # ステップ1：相手のパーティ選択
 # ==========================================
 if st.session_state.step == 1:
     st.subheader("① 相手のパーティ6匹を登録")
-    st.info("※ 検索文字を変更すると選択がリセットされるため、検索を使う場合は文字を消さずにまとめて選ぶか、スクロールして探してください。")
     
-    # 検索機能
-    hira2kata = str.maketrans(
-        "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをん", 
-        "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲン"
+    # 検索しても消えず、最大6匹の制限ができる multiselect を採用
+    opp_6 = st.multiselect(
+        "相手のパーティ6匹を選択（タップして検索）", 
+        options=POKEMON_LIST,
+        max_selections=6,
+        default=st.session_state.get("opp_6", []),
+        placeholder="カタカナで検索..."
     )
-    search_word = st.text_input("検索（ひらがなOK）", "")
     
-    if search_word:
-        kata_search = search_word.translate(hira2kata)
-        filtered_options = [p for p in POKEMON_LIST if kata_search in p]
-    else:
-        filtered_options = POKEMON_LIST
-        
-    # フォーム1
-    with st.form("form_step_1"):
-        with st.container(height=300):
-            selected_6 = st.pills(
-                "相手のパーティ", 
-                options=filtered_options, 
-                selection_mode="multi",
-                label_visibility="collapsed"
-            )
-        
-        # 次へ進むボタン
-        if st.form_submit_button("この6匹で決定 ＞"):
-            if len(selected_6) > 0:
-                st.session_state.opp_6 = selected_6
-                st.session_state.step = 2
-                st.rerun() # ステップ2へ画面を切り替え
-            else:
-                st.error("相手のポケモンを1匹以上選んでください。")
+    # 次へ進むボタン
+    if st.button("この6匹で決定 ＞"):
+        if len(opp_6) > 0:
+            st.session_state.opp_6 = opp_6
+            st.session_state.step = 2
+            st.rerun()
+        else:
+            st.error("相手のポケモンを1匹以上選んでください。")
 
 # ==========================================
 # ステップ2：選出と結果の記録
@@ -105,19 +89,27 @@ elif st.session_state.step == 2:
         
     st.write("---")
     
-    # フォーム2
+    # フォーム2（ここでの選択はタップ1回でサクサク動きます）
     with st.form("form_step_2"):
+        st.write("※選出は最大4匹まで、残ったポケモンは最大2匹まで")
+        
         opp_4 = st.pills("相手の選出4匹", options=st.session_state.opp_6, selection_mode="multi")
         my_4 = st.pills("自分の選出4匹", options=MY_PARTY, selection_mode="multi")
         result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True)
         
-        # ※連動機能がないため、残ったポケモンの候補は両方のパーティ全員分を表示します
         last_pokemon_options = MY_PARTY + st.session_state.opp_6
         last_poke = st.pills("最後に場に残ったポケモン", options=last_pokemon_options, selection_mode="multi")
         
         # 記録ボタン
         if st.form_submit_button("スプレッドシートに保存"):
-            if len(opp_4) > 0 and len(my_4) > 0:
+            # ここで最大数のチェックを行います
+            if len(opp_4) == 0 or len(my_4) == 0:
+                st.error("相手の選出と自分の選出をそれぞれ1匹以上選んでください。")
+            elif len(opp_4) > 4 or len(my_4) > 4:
+                st.error("選出はそれぞれ4匹以下にしてください。")
+            elif len(last_poke) > 2:
+                st.error("最後に残ったポケモンは2匹以下にしてください。")
+            else:
                 opp_6_str = ", ".join(st.session_state.opp_6)
                 opp_4_str = ", ".join(opp_4)
                 my_4_str = ", ".join(my_4)
@@ -133,8 +125,6 @@ elif st.session_state.step == 2:
                 st.session_state.opp_6 = []
                 st.session_state.step = 1
                 st.rerun()
-            else:
-                st.error("相手の選出と自分の選出をそれぞれ1匹以上選んでください。")
 
 # ==========================================
 # 分析画面：選出率と履歴
