@@ -154,7 +154,7 @@ st.header("データ分析")
 df = load_data()
 
 if not df.empty:
-# --- パーティごとの絞り込み ---
+    # --- パーティごとの絞り込み ---
     if "自分の6匹" in df.columns:
         def sort_party_str(party_str):
             if pd.isna(party_str) or str(party_str).strip() == "": return ""
@@ -169,54 +169,63 @@ if not df.empty:
             
         st.write("▼ 分析するパーティを選択")
             
-        # 【変更】高さ200pxのスクロールできる「小窓」を作り、その中にラジオボタンを配置する
+        # 高さ200pxのスクロールできる「小窓」を作り、その中にラジオボタンを配置する
         with st.container(height=200):
             selected_party = st.radio(
                 "分析するパーティを選択", 
                 party_history, 
                 index=party_history.index(current_party_str) if current_party_str in party_history else 0,
-                label_visibility="collapsed" # 見出しは小窓の外に置いたので、ここは非表示にする
+                label_visibility="collapsed" 
             )
             
-            df_filtered = df[df["分析用パーティ"] == selected_party]    # --- 勝率表示 ---
-    win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
-    total_count = len(df_filtered)
-    st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
-    st.write("---")
+        # 選択されたパーティでデータを絞り込む
+        df_filtered = df[df["分析用パーティ"] == selected_party]
+    else:
+        df_filtered = df
+
+    # 絞り込んだデータが存在する場合のみ、以下の分析を表示する
+    if not df_filtered.empty:
+        # --- 勝率表示 ---
+        win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
+        total_count = len(df_filtered)
+        st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
+        st.write("---")
 
         # --- 相手の選出率・先発率の分析 ---
-    if "相手の6匹" in df.columns and "相手の選出" in df.columns:
-        st.subheader("相手のポケモンの選出率・先発率")
+        if "相手の6匹" in df.columns and "相手の選出" in df.columns:
+            st.subheader("相手のポケモンの選出率・先発率")
             
-        # スマホからタップしやすい並び替えボタン
-        sort_target = st.radio(
-            "並び替え", 
-            ["遭遇回数 が多い順", "選出率 が高い順", "先発率 が高い順"], 
-            horizontal=True
-        )
+            sort_target = st.radio(
+                "並び替え", 
+                ["遭遇回数 が多い順", "選出率 が高い順", "先発率 が高い順"], 
+                horizontal=True
+            )
             
-        opp_data = []
-        for idx, row in df_filtered.iterrows():
-            opp_6_str = str(row.get("相手の6匹", ""))
-            opp_4_str = str(row.get("相手の選出", ""))
-            opp_lead_str = str(row.get("相手の先発", ""))
+            opp_data = []
             
-            # 先発データがちゃんと記録されている試合かどうかを判定
-            has_lead_data = pd.notna(opp_lead_str) and opp_lead_str.strip() != ""
+            # 【ループ開始】1試合ごとにデータを集計する
+            for idx, row in df_filtered.iterrows():
+                opp_6_str = str(row.get("相手の6匹", ""))
+                opp_4_str = str(row.get("相手の選出", ""))
+                opp_lead_str = str(row.get("相手の先発", ""))
                 
-            if pd.notna(opp_6_str) and opp_6_str.strip() != "":
-                o_6 = [p.strip() for p in opp_6_str.split(",") if p.strip()]
-                o_4 = [p.strip() for p in opp_4_str.split(",") if p.strip()] if pd.notna(opp_4_str) else []
-                o_lead = [p.strip() for p in opp_lead_str.split(",") if p.strip()] if has_lead_data else []
+                has_lead_data = pd.notna(opp_lead_str) and opp_lead_str.strip() != ""
+                
+                if pd.notna(opp_6_str) and opp_6_str.strip() != "":
+                    o_6 = [p.strip() for p in opp_6_str.split(",") if p.strip()]
+                    o_4 = [p.strip() for p in opp_4_str.split(",") if p.strip()] if pd.notna(opp_4_str) else []
+                    o_lead = [p.strip() for p in opp_lead_str.split(",") if p.strip()] if has_lead_data else []
                     
-                for p in o_6:
-                    opp_data.append({
-                        "ポケモン": p,
-                        "選出": 1 if p in o_4 else 0,
-                        "先発": 1 if p in o_lead else 0,
-                        "先発有効対戦": 1 if has_lead_data else 0 # 過去の空欄データを無視するためのフラグ
-                    })
+                    for p in o_6:
+                        opp_data.append({
+                            "ポケモン": p,
+                            "選出": 1 if p in o_4 else 0,
+                            "先発": 1 if p in o_lead else 0,
+                            "先発有効対戦": 1 if has_lead_data else 0 
+                        })
+            # 【ループ終了】
             
+            # ★ ここから下の表示処理をループの外（左側）に移動させました
             if opp_data:
                 opp_df = pd.DataFrame(opp_data)
                 
@@ -228,16 +237,14 @@ if not df.empty:
                     先発有効対戦数=("先発有効対戦", "sum")
                 ).reset_index()
                 
-                # 確率の計算（先発率は、先発データがある試合だけを分母にする）
+                # 確率の計算
                 stats_df["選出率"] = (stats_df["選出回数"] / stats_df["遭遇回数"]) * 100
-                
-                # ゼロ除算エラーを防ぐため、先発有効対戦数が0の時は先発率も0にする
                 stats_df["先発率"] = stats_df.apply(
                     lambda x: (x["先発回数"] / x["先発有効対戦数"] * 100) if x["先発有効対戦数"] > 0 else 0.0, 
                     axis=1
                 )
                 
-                # ラジオボタンの選択に合わせて並び替えを実行
+                # 並び替えの実行
                 if "遭遇回数" in sort_target:
                     stats_df = stats_df.sort_values(by=["遭遇回数", "選出率"], ascending=[False, False])
                 elif "選出率" in sort_target:
@@ -245,12 +252,12 @@ if not df.empty:
                 elif "先発率" in sort_target:
                     stats_df = stats_df.sort_values(by=["先発率", "遭遇回数"], ascending=[False, False])
                 
-                # 表示用のデータフレームを整理
+                # 表示用の整理
                 display_df = stats_df[["ポケモン", "遭遇回数", "選出率", "先発率"]].copy()
                 display_df["選出率"] = display_df["選出率"].apply(lambda x: f"{x:.1f}%")
                 display_df["先発率"] = display_df["先発率"].apply(lambda x: f"{x:.1f}%")
                 
-                # スマホでもスッキリ見やすい表として出力（hide_indexで左端の数字を消す）
+                # 表はここに1回だけ表示されるようになります
                 st.dataframe(display_df, use_container_width=True, hide_index=True)
             else:
                 st.info("集計できる相手のデータがありません。")
@@ -274,7 +281,6 @@ if not df.empty:
             st.altair_chart(chart, use_container_width=True)
 
         st.subheader("直近の対戦履歴")
-        # 履歴もインデックスを隠してスッキリさせる
         st.dataframe(df_filtered.sort_index(ascending=False).head(20), hide_index=True)
     else:
         st.info("このパーティでの対戦記録はまだありません。")
