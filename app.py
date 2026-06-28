@@ -63,7 +63,7 @@ hira2kata = str.maketrans(
 )
 
 # 検索ボックス（ここをタップした時だけキーボードが出ます）
-search_word = st.text_input("検索（ひらがな入力OK）", "")
+search_word = st.text_input("検索", "")
 
 # 検索ワードがあればリストを絞り込む
 if search_word:
@@ -92,16 +92,6 @@ with st.container(height=250):
 # 選ばれているポケモンがいれば外側にテキストで表示する
 if len(st.session_state.opp_6) > 0:
     st.write(f"【選択中】 {', '.join(st.session_state.opp_6)}")
-
-# 折りたたみメニューの中に300匹のボタンを隠す
-with st.expander("ここをタップしてポケモン一覧を開閉"):
-    st.session_state.opp_6 = st.pills(
-        "相手のパーティ", 
-        options=POKEMON_LIST, 
-        selection_mode="multi",
-        default=st.session_state.opp_6,
-        label_visibility="collapsed" # 見出しを隠してスッキリさせる
-    )
 
 st.write("---")
 st.write("▼ 選出と結果を記録")
