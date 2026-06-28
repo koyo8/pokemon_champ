@@ -48,119 +48,94 @@ st.title("ポケモン チャンピオンズ 対戦記録")
 
 st.header("新しい対戦の記録")
 
-# --- スマホの2回タップ問題を解消 ---
-st.markdown(
-    """
-    <style>
-    /* iPhoneのホバー判定を無効化し、1回のタップで即座に反応させる */
-    div[data-testid="stPills"] label {
-        touch-action: manipulation !important;
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# --- 自動リセットのための準備 ---
+# --- 画面切り替えのための状態管理 ---
+if "step" not in st.session_state: st.session_state.step = 1
 if "opp_6" not in st.session_state: st.session_state.opp_6 = []
-if "opp_4" not in st.session_state: st.session_state.opp_4 = []
-if "my_4" not in st.session_state: st.session_state.my_4 = []
-if "last_poke" not in st.session_state: st.session_state.last_poke = []
 
-# --- 相手のパーティを入力（検索ボックス＋ボタン式） ---
-st.write("相手のパーティ6匹を選択")
-
-# ひらがなをカタカナに変換するための仕組み（Pythonの標準機能）
-hira2kata = str.maketrans(
-    "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをん", 
-    "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲン"
-)
-
-# 検索ボックス（ここをタップした時だけキーボードが出ます）
-search_word = st.text_input("検索", "")
-
-# 検索ワードがあればリストを絞り込む
-if search_word:
-    # 入力された文字をカタカナに変換して検索する
-    kata_search = search_word.translate(hira2kata)
-    filtered_options = [p for p in POKEMON_LIST if kata_search in p]
-else:
-    # 検索ワードが空の場合は全件表示
-    filtered_options = POKEMON_LIST
-
-# 選択済みのポケモンは、検索結果から外れてもボタンとして残しておくための処理
-for p in st.session_state.opp_6:
-    if p not in filtered_options:
-        filtered_options.insert(0, p) # 見失わないように先頭に追加
-
-# 画面が長くなりすぎないよう、スクロールできる枠の中にボタンを配置
-with st.container(height=250):
-    st.session_state.opp_6 = st.pills(
-        "相手のパーティ", 
-        options=filtered_options, 
-        selection_mode="multi",
-        default=st.session_state.opp_6,
-        label_visibility="collapsed"
+# ==========================================
+# ステップ1：相手のパーティ選択
+# ==========================================
+if st.session_state.step == 1:
+    st.subheader("① 相手のパーティ6匹を登録")
+    st.info("※ 検索文字を変更すると選択がリセットされるため、検索を使う場合は文字を消さずにまとめて選ぶか、スクロールして探してください。")
+    
+    # 検索機能
+    hira2kata = str.maketrans(
+        "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをん", 
+        "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲン"
     )
-
-st.write("---")
-st.write("▼ 選出と結果を記録")
-
-# --- 相手の選出 ---
-opp_4_options = st.session_state.opp_6 if st.session_state.opp_6 else []
-st.session_state.opp_4 = st.pills(
-    "相手の選出4匹", 
-    options=opp_4_options, 
-    selection_mode="multi",
-    default=st.session_state.opp_4
-)
-
-# --- 自分の選出 ---
-st.session_state.my_4 = st.pills(
-    "自分の選出4匹", 
-    options=MY_PARTY, 
-    selection_mode="multi",
-    default=st.session_state.my_4
-)
-
-result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True)
-
-# --- 最後に残ったポケモン ---
-last_pokemon_options = st.session_state.my_4 + st.session_state.opp_4
-st.session_state.last_poke = st.pills(
-    "最後に場に残ったポケモン", 
-    options=last_pokemon_options, 
-    selection_mode="multi",
-    default=st.session_state.last_poke
-)
-
-# --- 記録ボタンとリセット処理 ---
-if st.button("保存"):
-    if len(st.session_state.opp_6) > 0 and len(st.session_state.opp_4) > 0 and len(st.session_state.my_4) > 0:
-        opp_6_str = ", ".join(st.session_state.opp_6)
-        opp_4_str = ", ".join(st.session_state.opp_4)
-        my_4_str = ", ".join(st.session_state.my_4)
-        date_str = pd.Timestamp.now("Asia/Tokyo").strftime("%Y-%m-%d %H:%M")
-        
-        last_pokemon_str = ", ".join(st.session_state.last_poke) if len(st.session_state.last_poke) > 0 else "なし"
-        current_party_str = ", ".join(sorted(MY_PARTY))
-        
-        # スプレッドシートに保存
-        sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon_str, current_party_str])
-        
-        # 保存完了後、セッションステート（裏側のデータ）を空にして画面を更新する
-        st.session_state.opp_6 = []
-        st.session_state.opp_4 = []
-        st.session_state.my_4 = []
-        st.session_state.last_poke = []
-        st.rerun() # 画面をリロードしてリセットを反映
+    search_word = st.text_input("検索（ひらがなOK）", "")
+    
+    if search_word:
+        kata_search = search_word.translate(hira2kata)
+        filtered_options = [p for p in POKEMON_LIST if kata_search in p]
     else:
-        st.error("相手の6匹、相手の選出、自分の選出をそれぞれ1匹以上選んでください。")
+        filtered_options = POKEMON_LIST
+        
+    # フォーム1
+    with st.form("form_step_1"):
+        with st.container(height=300):
+            selected_6 = st.pills(
+                "相手のパーティ", 
+                options=filtered_options, 
+                selection_mode="multi",
+                label_visibility="collapsed"
+            )
+        
+        # 次へ進むボタン
+        if st.form_submit_button("この6匹で決定 ＞"):
+            if len(selected_6) > 0:
+                st.session_state.opp_6 = selected_6
+                st.session_state.step = 2
+                st.rerun() # ステップ2へ画面を切り替え
+            else:
+                st.error("相手のポケモンを1匹以上選んでください。")
 
-# ※ 保存が成功した後のメッセージ表示用
-if len(st.session_state.opp_6) == 0 and 'opp_6_str' not in locals():
-    pass
+# ==========================================
+# ステップ2：選出と結果の記録
+# ==========================================
+elif st.session_state.step == 2:
+    st.subheader("② 選出と結果を記録")
+    
+    # 選んだ6匹の確認と戻るボタン
+    st.write(f"**相手のパーティ:** {', '.join(st.session_state.opp_6)}")
+    if st.button("＜ 相手の6匹を選び直す"):
+        st.session_state.step = 1
+        st.rerun()
+        
+    st.write("---")
+    
+    # フォーム2
+    with st.form("form_step_2"):
+        opp_4 = st.pills("相手の選出4匹", options=st.session_state.opp_6, selection_mode="multi")
+        my_4 = st.pills("自分の選出4匹", options=MY_PARTY, selection_mode="multi")
+        result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True)
+        
+        # ※連動機能がないため、残ったポケモンの候補は両方のパーティ全員分を表示します
+        last_pokemon_options = MY_PARTY + st.session_state.opp_6
+        last_poke = st.pills("最後に場に残ったポケモン", options=last_pokemon_options, selection_mode="multi")
+        
+        # 記録ボタン
+        if st.form_submit_button("スプレッドシートに保存"):
+            if len(opp_4) > 0 and len(my_4) > 0:
+                opp_6_str = ", ".join(st.session_state.opp_6)
+                opp_4_str = ", ".join(opp_4)
+                my_4_str = ", ".join(my_4)
+                date_str = pd.Timestamp.now("Asia/Tokyo").strftime("%Y-%m-%d %H:%M")
+                
+                last_pokemon_str = ", ".join(last_poke) if len(last_poke) > 0 else "なし"
+                current_party_str = ", ".join(sorted(MY_PARTY))
+                
+                # スプレッドシートに保存
+                sheet.append_row([date_str, opp_6_str, opp_4_str, my_4_str, result, last_pokemon_str, current_party_str])
+                
+                # 完全にリセットしてステップ1に戻る
+                st.session_state.opp_6 = []
+                st.session_state.step = 1
+                st.rerun()
+            else:
+                st.error("相手の選出と自分の選出をそれぞれ1匹以上選んでください。")
+
 # ==========================================
 # 分析画面：選出率と履歴
 # ==========================================
