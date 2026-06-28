@@ -158,72 +158,63 @@ if not df.empty:
     if "自分の6匹" in df.columns:
         def sort_party_str(party_str):
             if pd.isna(party_str) or str(party_str).strip() == "": return ""
-            return ", ".join(sorted([p.strip() for p in str(party_str).split(",") if p.strip()]))
+            # 見た目を少しスッキリさせるため、カンマではなく「 / 」区切りにする
+            return " / ".join(sorted([p.strip() for p in str(party_str).split(",") if p.strip()]))
         
         df["分析用パーティ"] = df["自分の6匹"].apply(sort_party_str)
         party_history = [p for p in df["分析用パーティ"].unique() if p != ""]
-        current_party_str = ", ".join(sorted(MY_PARTY))
+        
+        # 現在のパーティも同じ形式（スラッシュ区切り）にする
+        current_party_str = " / ".join(sorted(MY_PARTY))
         if current_party_str not in party_history:
             party_history.insert(0, current_party_str)
-
-        # スマホで見切れないよう、選択肢の文字を省略する関数
-        def shorten_party_name(party_str):
-            pokemons = [p.strip() for p in party_str.split(",") if p.strip()]
-            if len(pokemons) > 3:
-                # 最初の3匹だけを表示し、残りは省略する
-                return f"{pokemons[0]} / {pokemons[1]} / {pokemons[2]} ... (他{len(pokemons)-3}匹)"
-            return party_str
-
-        selected_party = st.selectbox(
+        
+        # 【変更】プルダウンをやめて、文字が自動で折り返される「ラジオボタン」を使用
+        selected_party = st.radio(
             "▼ 分析するパーティを選択", 
             party_history, 
-            index=party_history.index(current_party_str) if current_party_str in party_history else 0,
-            format_func=shorten_party_name # ← ここで省略関数を適用
+            index=party_history.index(current_party_str) if current_party_str in party_history else 0
         )
-
-        # 選択中のパーティの全員の名前を、枠の下に小さく表示して確認できるようにする
-        st.caption(f"【選択中の6匹】 {selected_party}")
-
+            
         df_filtered = df[df["分析用パーティ"] == selected_party]
-    if not df_filtered.empty:
-        # --- 勝率表示 ---
-        win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
-        total_count = len(df_filtered)
-        st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
-        st.write("---")
+    # --- 勝率表示 ---
+    win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
+    total_count = len(df_filtered)
+    st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
+    st.write("---")
 
         # --- 相手の選出率・先発率の分析 ---
-        if "相手の6匹" in df.columns and "相手の選出" in df.columns:
-            st.subheader("相手のポケモンの選出率・先発率")
+    if "相手の6匹" in df.columns and "相手の選出" in df.columns:
+        st.subheader("相手のポケモンの選出率・先発率")
             
-            # スマホからタップしやすい並び替えボタン
-            sort_target = st.radio(
-                "並び替え", 
-                ["遭遇回数 が多い順", "選出率 が高い順", "先発率 が高い順"], 
-                horizontal=True
-            )
+        # スマホからタップしやすい並び替えボタン
+        sort_target = st.radio(
+            "並び替え", 
+            ["遭遇回数 が多い順", "選出率 が高い順", "先発率 が高い順"], 
+            horizontal=True
+        )
             
-            opp_data = []
-            for idx, row in df_filtered.iterrows():
-                opp_6_str = str(row.get("相手の6匹", ""))
-                opp_4_str = str(row.get("相手の選出", ""))
-                opp_lead_str = str(row.get("相手の先発", ""))
+        opp_data = []
+        for idx, row in df_filtered.iterrows():
+            opp_6_str = str(row.get("相手の6匹", ""))
+            opp_4_str = str(row.get("相手の選出", ""))
+            opp_lead_str = str(row.get("相手の先発", ""))
+            
+            # 先発データがちゃんと記録されている試合かどうかを判定
+            has_lead_data = pd.notna(opp_lead_str) and opp_lead_str.strip() != ""
                 
-                # 先発データがちゃんと記録されている試合かどうかを判定
-                has_lead_data = pd.notna(opp_lead_str) and opp_lead_str.strip() != ""
-                
-                if pd.notna(opp_6_str) and opp_6_str.strip() != "":
-                    o_6 = [p.strip() for p in opp_6_str.split(",") if p.strip()]
-                    o_4 = [p.strip() for p in opp_4_str.split(",") if p.strip()] if pd.notna(opp_4_str) else []
-                    o_lead = [p.strip() for p in opp_lead_str.split(",") if p.strip()] if has_lead_data else []
+            if pd.notna(opp_6_str) and opp_6_str.strip() != "":
+                o_6 = [p.strip() for p in opp_6_str.split(",") if p.strip()]
+                o_4 = [p.strip() for p in opp_4_str.split(",") if p.strip()] if pd.notna(opp_4_str) else []
+                o_lead = [p.strip() for p in opp_lead_str.split(",") if p.strip()] if has_lead_data else []
                     
-                    for p in o_6:
-                        opp_data.append({
-                            "ポケモン": p,
-                            "選出": 1 if p in o_4 else 0,
-                            "先発": 1 if p in o_lead else 0,
-                            "先発有効対戦": 1 if has_lead_data else 0 # 過去の空欄データを無視するためのフラグ
-                        })
+                for p in o_6:
+                    opp_data.append({
+                        "ポケモン": p,
+                        "選出": 1 if p in o_4 else 0,
+                        "先発": 1 if p in o_lead else 0,
+                        "先発有効対戦": 1 if has_lead_data else 0 # 過去の空欄データを無視するためのフラグ
+                    })
             
             if opp_data:
                 opp_df = pd.DataFrame(opp_data)
