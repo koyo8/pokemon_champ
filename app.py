@@ -134,12 +134,12 @@ with st.form("form_record"):
     
     # 【追加機能】順番を気にせず「先発」と「後発」を分けて選択させることで正確にデータを取ります
     st.write("**【相手の選出】**")
-    opp_lead = st.pills("相手の先発 (2匹)", options=current_opp_6, selection_mode="multi", max_selections=2, key=f"opp_lead_{rk}")
-    opp_back = st.pills("相手の後発 (2匹)", options=current_opp_6, selection_mode="multi", max_selections=2, key=f"opp_back_{rk}")
+    opp_lead = st.pills("相手の先発 (2匹)", options=current_opp_6, selection_mode="multi", key=f"opp_lead_{rk}")
+    opp_back = st.pills("相手の後発 (2匹)", options=current_opp_6, selection_mode="multi", key=f"opp_back_{rk}")
     
     st.write("**【自分の選出】**")
-    my_lead = st.pills("自分の先発 (2匹)", options=MY_PARTY, selection_mode="multi", max_selections=2, key=f"my_lead_{rk}")
-    my_back = st.pills("自分の後発 (2匹)", options=MY_PARTY, selection_mode="multi", max_selections=2, key=f"my_back_{rk}")
+    my_lead = st.pills("自分の先発 (2匹)", options=MY_PARTY, selection_mode="multi", key=f"my_lead_{rk}")
+    my_back = st.pills("自分の後発 (2匹)", options=MY_PARTY, selection_mode="multi", key=f"my_back_{rk}")
     
     st.write("---")
     result = st.radio("勝敗", ["勝ち", "負け"], horizontal=True, index=None, key=f"result_widget_{rk}")
