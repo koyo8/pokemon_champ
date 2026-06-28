@@ -57,19 +57,33 @@ if "step" not in st.session_state: st.session_state.step = 1
 if st.session_state.step == 1:
     st.subheader("① 相手のパーティ6匹を登録")
     
-    # 検索しても消えず、最大6匹の制限ができる multiselect を採用
-    opp_6 = st.multiselect(
-        "相手のパーティ6匹を選択（タップして検索）", 
-        options=POKEMON_LIST,
+    # カタカナをひらがなに変換するルール
+    kata2hira = str.maketrans(
+        "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴ", 
+        "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔ"
+    )
+    
+    # 「リザードン (りざーどん)」のような、検索用の表示名と元の名前の対応表を作る
+    display_to_orig = {f"{p} ({p.translate(kata2hira)})": p for p in POKEMON_LIST}
+    orig_to_display = {v: k for k, v in display_to_orig.items()}
+    
+    # すでに選ばれているポケモンがいれば、それを検索用の表示名に変換してセットする
+    default_display = [orig_to_display[p] for p in st.session_state.get("opp_6", []) if p in orig_to_display]
+    
+    # 検索しても消えず、ひらがなで引っかかる最強の multiselect
+    selected_display = st.multiselect(
+        "▼ 相手のパーティを選択", 
+        options=list(display_to_orig.keys()),
         max_selections=6,
-        default=st.session_state.get("opp_6", []),
-        placeholder="カタカナで検索..."
+        default=default_display,
+        placeholder="ひらがなで検索..."
     )
     
     # 次へ進むボタン
     if st.button("この6匹で決定 ＞"):
-        if len(opp_6) > 0:
-            st.session_state.opp_6 = opp_6
+        if len(selected_display) > 0:
+            # 次に進む前に「リザードン (りざーどん)」から「リザードン」に戻して裏側に保存
+            st.session_state.opp_6 = [display_to_orig[s] for s in selected_display]
             st.session_state.step = 2
             st.rerun()
         else:
