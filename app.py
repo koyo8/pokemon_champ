@@ -3,6 +3,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 import json
+import altair as alt
 
 # ==========================================
 # 設定エリア
@@ -88,10 +89,6 @@ with st.container(height=250):
         default=st.session_state.opp_6,
         label_visibility="collapsed"
     )
-
-# 選ばれているポケモンがいれば外側にテキストで表示する
-if len(st.session_state.opp_6) > 0:
-    st.write(f"【選択中】 {', '.join(st.session_state.opp_6)}")
 
 st.write("---")
 st.write("▼ 選出と結果を記録")
@@ -204,7 +201,12 @@ if not df.empty:
         if all_my_picks:
             pick_counts = pd.Series(all_my_picks).value_counts().reset_index()
             pick_counts.columns = ['ポケモン', '選出回数']
-            st.bar_chart(pick_counts.set_index('ポケモン'))
+            chart = alt.Chart(pick_counts).mark_bar().encode(
+                x=alt.X('ポケモン', sort=None, title='ポケモン'),
+                y=alt.Y('選出回数', title='選出回数'),
+                tooltip=['ポケモン', '選出回数'] # マウスを乗せた時だけ数字が出るように設定
+            )
+            st.altair_chart(chart, use_container_width=True)
 
         win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
         total_count = len(df_filtered)
