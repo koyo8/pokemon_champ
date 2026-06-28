@@ -53,20 +53,27 @@ if "opp_4" not in st.session_state: st.session_state.opp_4 = []
 if "my_4" not in st.session_state: st.session_state.my_4 = []
 if "last_poke" not in st.session_state: st.session_state.last_poke = []
 
-# --- 相手のパーティを入力（ここは全リストから探すので検索式のmultiselectに戻す） ---
-st.write("▼ 相手のパーティ6匹を検索して選択")
-st.session_state.opp_6 = st.multiselect(
-    "相手のパーティ6匹", 
-    options=POKEMON_LIST,
-    max_selections=6,
-    default=st.session_state.opp_6,
-    placeholder="タップして検索..."
-)
+# --- 相手のパーティを入力 ---
+st.write("▼ 相手のパーティ6匹を選択")
+
+# 選ばれているポケモンがいれば外側にテキストで表示する
+if len(st.session_state.opp_6) > 0:
+    st.write(f"【選択中】 {', '.join(st.session_state.opp_6)}")
+
+# 折りたたみメニューの中に300匹のボタンを隠す
+with st.expander("ここをタップしてポケモン一覧を開閉"):
+    st.session_state.opp_6 = st.pills(
+        "相手のパーティ", 
+        options=POKEMON_LIST, 
+        selection_mode="multi",
+        default=st.session_state.opp_6,
+        label_visibility="collapsed" # 見出しを隠してスッキリさせる
+    )
 
 st.write("---")
-st.write("▼ 選出と結果を記録します")
+st.write("▼ 選出と結果を記録")
 
-# --- 相手の選出（6匹から4匹を選ぶので、ここはボタン式のpillsが快適） ---
+# --- 相手の選出 ---
 opp_4_options = st.session_state.opp_6 if st.session_state.opp_6 else []
 st.session_state.opp_4 = st.pills(
     "相手の選出4匹", 
@@ -75,7 +82,7 @@ st.session_state.opp_4 = st.pills(
     default=st.session_state.opp_4
 )
 
-# --- 自分の選出（テキスト表示を削除し、ボタンのみスッキリ配置） ---
+# --- 自分の選出 ---
 st.session_state.my_4 = st.pills(
     "自分の選出4匹", 
     options=MY_PARTY, 
@@ -95,7 +102,7 @@ st.session_state.last_poke = st.pills(
 )
 
 # --- 記録ボタンとリセット処理 ---
-if st.button("記録をスプレッドシートに保存"):
+if st.button("保存"):
     if len(st.session_state.opp_6) > 0 and len(st.session_state.opp_4) > 0 and len(st.session_state.my_4) > 0:
         opp_6_str = ", ".join(st.session_state.opp_6)
         opp_4_str = ", ".join(st.session_state.opp_4)
