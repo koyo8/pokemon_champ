@@ -53,19 +53,20 @@ if "opp_4" not in st.session_state: st.session_state.opp_4 = []
 if "my_4" not in st.session_state: st.session_state.my_4 = []
 if "last_poke" not in st.session_state: st.session_state.last_poke = []
 
-# --- 相手のパーティを入力（ボタン式） ---
-st.write("▼ 相手のパーティ6匹をタップして選択")
-st.session_state.opp_6 = st.pills(
+# --- 相手のパーティを入力（ここは全リストから探すので検索式のmultiselectに戻す） ---
+st.write("▼ 相手のパーティ6匹を検索して選択")
+st.session_state.opp_6 = st.multiselect(
     "相手のパーティ6匹", 
-    options=POKEMON_LIST, 
-    selection_mode="multi",
-    default=st.session_state.opp_6
+    options=POKEMON_LIST,
+    max_selections=6,
+    default=st.session_state.opp_6,
+    placeholder="タップして検索..."
 )
 
 st.write("---")
 st.write("▼ 選出と結果を記録します")
 
-# --- 相手の選出 ---
+# --- 相手の選出（6匹から4匹を選ぶので、ここはボタン式のpillsが快適） ---
 opp_4_options = st.session_state.opp_6 if st.session_state.opp_6 else []
 st.session_state.opp_4 = st.pills(
     "相手の選出4匹", 
@@ -74,8 +75,7 @@ st.session_state.opp_4 = st.pills(
     default=st.session_state.opp_4
 )
 
-# --- 自分の選出 ---
-st.write(f"自分の現在のパーティ: {', '.join(MY_PARTY)}")
+# --- 自分の選出（テキスト表示を削除し、ボタンのみスッキリ配置） ---
 st.session_state.my_4 = st.pills(
     "自分の選出4匹", 
     options=MY_PARTY, 
@@ -119,7 +119,6 @@ if st.button("記録をスプレッドシートに保存"):
 
 # ※ 保存が成功した後のメッセージ表示用
 if len(st.session_state.opp_6) == 0 and 'opp_6_str' not in locals():
-    # rerun後は変数がリセットされているため、ここに簡単な成功メッセージだけ出せます
     pass
 # ==========================================
 # 分析画面：選出率と履歴
