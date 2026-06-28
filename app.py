@@ -182,51 +182,74 @@ if not df.empty:
         st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
         st.write("---")
 
-        # --- 相手の選出率・先発率の分析（超強力機能） ---
+        # --- 相手の選出率・先発率の分析 ---
         if "相手の6匹" in df.columns and "相手の選出" in df.columns:
             st.subheader("相手のポケモンの選出率・先発率")
+            
+            # 【追加】スマホからタップしやすい並び替えボタン
+            sort_target = st.radio(
+                "並び替え", 
+                ["遭遇回数 が多い順", "選出率 が高い順", "先発率 が高い順"], 
+                horizontal=True
+            )
             
             opp_data = []
             for idx, row in df_filtered.iterrows():
                 opp_6_str = str(row.get("相手の6匹", ""))
                 opp_4_str = str(row.get("相手の選出", ""))
-                opp_lead_str = str(row.get("相手の先発", "")) # 古いデータ対策として .get を使用
+                opp_lead_str = str(row.get("相手の先発", ""))
+                
+                # 先発データがちゃんと記録されている試合かどうかを判定
+                has_lead_data = pd.notna(opp_lead_str) and opp_lead_str.strip() != ""
                 
                 if pd.notna(opp_6_str) and opp_6_str.strip() != "":
-                    # データをリスト化
                     o_6 = [p.strip() for p in opp_6_str.split(",") if p.strip()]
                     o_4 = [p.strip() for p in opp_4_str.split(",") if p.strip()] if pd.notna(opp_4_str) else []
-                    o_lead = [p.strip() for p in opp_lead_str.split(",") if p.strip()] if pd.notna(opp_lead_str) else []
+                    o_lead = [p.strip() for p in opp_lead_str.split(",") if p.strip()] if has_lead_data else []
                     
-                    # パーティにいた各ポケモンが、選出されたか・先発だったかを記録
                     for p in o_6:
                         opp_data.append({
                             "ポケモン": p,
                             "選出": 1 if p in o_4 else 0,
-                            "先発": 1 if p in o_lead else 0
+                            "先発": 1 if p in o_lead else 0,
+                            "先発有効対戦": 1 if has_lead_data else 0 # 過去の空欄データを無視するためのフラグ
                         })
             
             if opp_data:
                 opp_df = pd.DataFrame(opp_data)
+                
                 # ポケモンごとに集計
                 stats_df = opp_df.groupby("ポケモン").agg(
                     遭遇回数=("ポケモン", "count"),
                     選出回数=("選出", "sum"),
-                    先発回数=("先発", "sum")
+                    先発回数=("先発", "sum"),
+                    先発有効対戦数=("先発有効対戦", "sum")
                 ).reset_index()
                 
-                # 確率を計算
+                # 確率の計算（先発率は、先発データがある試合だけを分母にする）
                 stats_df["選出率"] = (stats_df["選出回数"] / stats_df["遭遇回数"]) * 100
-                stats_df["先発率"] = (stats_df["先発回数"] / stats_df["遭遇回数"]) * 100
                 
-                # 遭遇回数が多い順 ＞ 選出率が高い順 に並び替え
-                stats_df = stats_df.sort_values(by=["遭遇回数", "選出率"], ascending=[False, False])
+                # ゼロ除算エラーを防ぐため、先発有効対戦数が0の時は先発率も0にする
+                stats_df["先発率"] = stats_df.apply(
+                    lambda x: (x["先発回数"] / x["先発有効対戦数"] * 100) if x["先発有効対戦数"] > 0 else 0.0, 
+                    axis=1
+                )
                 
-                # パーセンテージ表示に整える
-                stats_df["選出率"] = stats_df["選出率"].apply(lambda x: f"{x:.1f}%")
-                stats_df["先発率"] = stats_df["先発率"].apply(lambda x: f"{x:.1f}%")
+                # ラジオボタンの選択に合わせて並び替えを実行
+                if "遭遇回数" in sort_target:
+                    stats_df = stats_df.sort_values(by=["遭遇回数", "選出率"], ascending=[False, False])
+                elif "選出率" in sort_target:
+                    stats_df = stats_df.sort_values(by=["選出率", "遭遇回数"], ascending=[False, False])
+                elif "先発率" in sort_target:
+                    stats_df = stats_df.sort_values(by=["先発率", "遭遇回数"], ascending=[False, False])
                 
-                st.dataframe(stats_df, use_container_width=True)
+                # 表示用のデータフレームを整理
+                display_df = stats_df[["ポケモン", "遭遇回数", "選出率", "先発率"]].copy()
+                display_df["選出率"] = display_df["選出率"].apply(lambda x: f"{x:.1f}%")
+                display_df["先発率"] = display_df["先発率"].apply(lambda x: f"{x:.1f}%")
+                
+                # スマホでもスッキリ見やすい表として出力（hide_indexで左端の数字を消す）
+                st.dataframe(display_df, use_container_width=True, hide_index=True)
             else:
                 st.info("集計できる相手のデータがありません。")
             
@@ -249,7 +272,8 @@ if not df.empty:
             st.altair_chart(chart, use_container_width=True)
 
         st.subheader("直近の対戦履歴")
-        st.dataframe(df_filtered.sort_index(ascending=False).head(20))
+        # 履歴もインデックスを隠してスッキリさせる
+        st.dataframe(df_filtered.sort_index(ascending=False).head(20), hide_index=True)
     else:
         st.info("このパーティでの対戦記録はまだありません。")
 else:
