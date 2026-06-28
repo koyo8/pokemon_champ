@@ -53,8 +53,41 @@ if "opp_4" not in st.session_state: st.session_state.opp_4 = []
 if "my_4" not in st.session_state: st.session_state.my_4 = []
 if "last_poke" not in st.session_state: st.session_state.last_poke = []
 
-# --- 相手のパーティを入力 ---
-st.write("▼ 相手のパーティ6匹を選択")
+# --- 相手のパーティを入力（検索ボックス＋ボタン式） ---
+st.write("相手のパーティ6匹を選択")
+
+# ひらがなをカタカナに変換するための仕組み（Pythonの標準機能）
+hira2kata = str.maketrans(
+    "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをん", 
+    "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲン"
+)
+
+# 検索ボックス（ここをタップした時だけキーボードが出ます）
+search_word = st.text_input("検索（ひらがな入力OK）", "")
+
+# 検索ワードがあればリストを絞り込む
+if search_word:
+    # 入力された文字をカタカナに変換して検索する
+    kata_search = search_word.translate(hira2kata)
+    filtered_options = [p for p in POKEMON_LIST if kata_search in p]
+else:
+    # 検索ワードが空の場合は全件表示
+    filtered_options = POKEMON_LIST
+
+# 選択済みのポケモンは、検索結果から外れてもボタンとして残しておくための処理
+for p in st.session_state.opp_6:
+    if p not in filtered_options:
+        filtered_options.insert(0, p) # 見失わないように先頭に追加
+
+# 画面が長くなりすぎないよう、スクロールできる枠の中にボタンを配置
+with st.container(height=250):
+    st.session_state.opp_6 = st.pills(
+        "相手のパーティ", 
+        options=filtered_options, 
+        selection_mode="multi",
+        default=st.session_state.opp_6,
+        label_visibility="collapsed"
+    )
 
 # 選ばれているポケモンがいれば外側にテキストで表示する
 if len(st.session_state.opp_6) > 0:
