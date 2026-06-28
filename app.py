@@ -158,26 +158,27 @@ if not df.empty:
     if "自分の6匹" in df.columns:
         def sort_party_str(party_str):
             if pd.isna(party_str) or str(party_str).strip() == "": return ""
-            # 見た目を少しスッキリさせるため、カンマではなく「 / 」区切りにする
             return " / ".join(sorted([p.strip() for p in str(party_str).split(",") if p.strip()]))
-        
+            
         df["分析用パーティ"] = df["自分の6匹"].apply(sort_party_str)
         party_history = [p for p in df["分析用パーティ"].unique() if p != ""]
-        
-        # 現在のパーティも同じ形式（スラッシュ区切り）にする
+            
         current_party_str = " / ".join(sorted(MY_PARTY))
         if current_party_str not in party_history:
             party_history.insert(0, current_party_str)
-        
-        # 【変更】プルダウンをやめて、文字が自動で折り返される「ラジオボタン」を使用
-        selected_party = st.radio(
-            "▼ 分析するパーティを選択", 
-            party_history, 
-            index=party_history.index(current_party_str) if current_party_str in party_history else 0
-        )
             
-        df_filtered = df[df["分析用パーティ"] == selected_party]
-    # --- 勝率表示 ---
+        st.write("▼ 分析するパーティを選択")
+            
+        # 【変更】高さ200pxのスクロールできる「小窓」を作り、その中にラジオボタンを配置する
+        with st.container(height=200):
+            selected_party = st.radio(
+                "分析するパーティを選択", 
+                party_history, 
+                index=party_history.index(current_party_str) if current_party_str in party_history else 0,
+                label_visibility="collapsed" # 見出しは小窓の外に置いたので、ここは非表示にする
+            )
+            
+            df_filtered = df[df["分析用パーティ"] == selected_party]    # --- 勝率表示 ---
     win_count = len(df_filtered[df_filtered["勝敗"] == "勝ち"])
     total_count = len(df_filtered)
     st.write(f"**総対戦数:** {total_count} 戦 / **勝ち:** {win_count} 勝 / **勝率:** {(win_count/total_count)*100:.1f} %")
