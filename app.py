@@ -63,7 +63,7 @@ selected_display = st.multiselect(
     options=list(display_to_orig.keys()),
     max_selections=6,
     key="opp_6_widget", # 保存後にリセットするための鍵
-    placeholder="ひらがなで検索..."
+    placeholder="検索..."
 )
 
 # 選択された表示用名前を元の名前に戻す
@@ -73,7 +73,7 @@ st.write("---")
 
 # --- ② 選出と結果を記録（フォーム内で1タップサクサク操作） ---
 with st.form("form_record"):
-    st.write("▼ ② 選出と結果を記録（※選出は最大4匹まで）")
+    st.write("▼ ② 選出と結果を記録")
     
     # 上で選んだ6匹がリアルタイムにここの選択肢に反映されます
     opp_4 = st.pills("相手の選出4匹", options=current_opp_6, selection_mode="multi")
